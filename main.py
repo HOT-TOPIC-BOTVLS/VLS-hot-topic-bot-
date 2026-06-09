@@ -130,6 +130,16 @@ async def graceful_shutdown():
         logger.error(f"Error during graceful shutdown: {e}", exc_info=True)
         await bot.close()
 
+     
+async def start_health_server():
+    app = web.Application()
+    app.router.add_get('/', lambda r: web.Response(text="Bot is running!"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    await site.start()
+    logger.info("Health check server started on port 10000")
+
 async def main():
     """Main entry point."""
     try:
