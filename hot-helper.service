@@ -1,0 +1,15 @@
+[Unit]
+Description=Hot Helper Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hot-helper
+Environment="PATH=/home/ubuntu/hot-helper/venv/bin"
+ExecStart=/home/ubuntu/hot-helper/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

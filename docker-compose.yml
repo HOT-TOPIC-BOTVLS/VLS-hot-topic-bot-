@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  hot-helper:
+    build: .
+    container_name: hot-helper-bot
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      DATABASE_URL: sqlite:///data/hot_helper.db
+      LOG_LEVEL: INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped

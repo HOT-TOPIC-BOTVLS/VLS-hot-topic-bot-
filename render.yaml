@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: hot-helper
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: DISCORD_TOKEN
+        scope: run
+      - key: OWNER_ID
+        scope: run
+      - key: DATABASE_URL
+        value: sqlite:///data/hot_helper.db
+      - key: LOG_LEVEL
+        value: INFO
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
