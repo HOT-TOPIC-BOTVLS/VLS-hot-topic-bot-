@@ -9,6 +9,8 @@ from pathlib import Path
 from config import DISCORD_TOKEN, OWNER_ID, BOT_PREFIX, BOT_STATUSES, BOT_NAME
 from database import Database
 from logger import logger
+import aiohttp
+from aiohttp import web
 
 # Initialize database
 db = Database()
