@@ -13,7 +13,7 @@ class VerificationView(discord.ui.View):
     """View for verification button."""
     
     def __init__(self):
-        super().__init__(timeout=none)
+        super().__init__(timeout=None)
     
     @discord.ui.button(label="✅ Verify", style=discord.ButtonStyle.green)
     async def verify_button(self, interaction: discord.Interaction, button: discord.ui.Button):
