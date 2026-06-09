@@ -92,7 +92,10 @@ async def load_cogs():
         
         cog_name = cog_file.stem
         try:
-            await bot.load_extension(f"cogs.{cog_name}")
+            if cog_name in ["main", "config", "database", "logger"]:
+    continue
+
+await bot.load_extension(f"{cog_name}")
             logger.info(f"Loaded cog: {cog_name}")
         except Exception as e:
             logger.error(f"Error loading cog {cog_name}: {e}", exc_info=True)
