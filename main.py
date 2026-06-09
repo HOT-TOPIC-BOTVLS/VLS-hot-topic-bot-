@@ -148,7 +148,7 @@ async def main():
         
         # Load cogs
         await load_cogs()
- await start_health_server()
+        await start_health_server()
 
         
         # Connect to Discord
