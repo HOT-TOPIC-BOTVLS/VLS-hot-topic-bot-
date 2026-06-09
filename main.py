@@ -84,7 +84,7 @@ async def on_error(event, *args, **kwargs):
 
 async def load_cogs():
     """Load all cogs."""
-    cogs_dir = Path(__file__).parent / "cogs"
+    cogs_dir = Path(__file__).parent
     
     for cog_file in cogs_dir.glob("*.py"):
         if cog_file.name.startswith("_"):
