@@ -148,6 +148,8 @@ async def main():
         
         # Load cogs
         await load_cogs()
+await start_health_server()
+
         
         # Connect to Discord
         logger.info(f"Starting {BOT_NAME}...")
