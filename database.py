@@ -1,4 +1,7 @@
-"""Database management for Hot Helper bot."""
+
+# Let me write the corrected database.py with proper indentation
+
+corrected_database = '''"""Database management for Hot Helper bot."""
 
 import sqlite3
 import json
@@ -37,7 +40,7 @@ class Database:
                 raid_join_threshold INTEGER DEFAULT 10,
                 raid_window INTEGER DEFAULT 60,
                 raid_pattern_count INTEGER DEFAULT 5,
-                raid_action TEXT DEFAULT 'ban',
+                raid_action TEXT DEFAULT \'ban\',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -84,7 +87,7 @@ class Database:
                 reason TEXT NOT NULL,
                 mod_id INTEGER NOT NULL,
                 issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                status TEXT DEFAULT 'pending',
+                status TEXT DEFAULT \'pending\',
                 approver_id INTEGER,
                 message_id INTEGER
             )
@@ -124,7 +127,7 @@ class Database:
                 current_song_json TEXT,
                 is_paused INTEGER DEFAULT 0,
                 volume INTEGER DEFAULT 100,
-                loop_mode TEXT DEFAULT 'off',
+                loop_mode TEXT DEFAULT \'off\',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -146,7 +149,7 @@ class Database:
                 user_id INTEGER NOT NULL,
                 guild_id INTEGER NOT NULL,
                 answers_json TEXT NOT NULL,
-                status TEXT DEFAULT 'pending',
+                status TEXT DEFAULT \'pending\',
                 reviewer_id INTEGER,
                 reviewed_at TIMESTAMP
             )
@@ -330,7 +333,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT * FROM mutes WHERE active = 1 AND expires_at IS NOT NULL AND expires_at <= datetime('now')
+            SELECT * FROM mutes WHERE active = 1 AND expires_at IS NOT NULL AND expires_at <= datetime(\'now\')
         """)
         results = cursor.fetchall()
         conn.close()
@@ -355,7 +358,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT * FROM pending_approvals WHERE guild_id = ? AND status = 'pending'
+            SELECT * FROM pending_approvals WHERE guild_id = ? AND status = \'pending\'
             ORDER BY issued_at DESC
         """, (guild_id,))
         results = cursor.fetchall()
@@ -367,7 +370,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE pending_approvals SET status = 'approved', approver_id = ?
+            UPDATE pending_approvals SET status = \'approved\', approver_id = ?
             WHERE id = ?
         """, (approver_id, approval_id))
         conn.commit()
@@ -378,7 +381,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE pending_approvals SET status = 'denied', approver_id = ?
+            UPDATE pending_approvals SET status = \'denied\', approver_id = ?
             WHERE id = ?
         """, (approver_id, approval_id))
         conn.commit()
@@ -393,7 +396,7 @@ class Database:
         
         # Get warnings
         cursor.execute(
-            "SELECT 'warning' as type, timestamp, situation as reason, mod_id FROM warnings WHERE user_id = ? AND guild_id = ? ORDER BY timestamp DESC LIMIT ?",
+            "SELECT \'warning\' as type, timestamp, situation as reason, mod_id FROM warnings WHERE user_id = ? AND guild_id = ? ORDER BY timestamp DESC LIMIT ?",
             (user_id, guild_id, limit)
         )
         for row in cursor.fetchall():
@@ -401,7 +404,7 @@ class Database:
         
         # Get mutes
         cursor.execute(
-            "SELECT 'mute' as type, issued_at, reason, mod_id FROM mutes WHERE user_id = ? AND guild_id = ? AND active = 1 ORDER BY issued_at DESC LIMIT ?",
+            "SELECT \'mute\' as type, issued_at, reason, mod_id FROM mutes WHERE user_id = ? AND guild_id = ? AND active = 1 ORDER BY issued_at DESC LIMIT ?",
             (user_id, guild_id, limit)
         )
         for row in cursor.fetchall():
@@ -474,7 +477,7 @@ class Database:
         return [dict(row) for row in results]
     
     def get_user_rank(self, user_id, guild_id):
-        """Get user's rank in guild."""
+        """Get user\'s rank in guild."""
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -527,7 +530,7 @@ class Database:
         conn.close()
         return dict(result) if result else None
     
-        # Music queue methods
+    # Music queue methods
     def save_music_queue(self, guild_id, queue_data, current_song, is_paused, volume, loop_mode):
         """Save music queue state."""
         # Limit queue size to 500 to prevent database bloat
@@ -686,4 +689,9 @@ class Database:
         cursor.execute("DELETE FROM raid_state WHERE guild_id = ?", (guild_id,))
         conn.commit()
         conn.close()
+'''
 
+with open('/mnt/agents/output/database.py', 'w', encoding='utf-8') as f:
+    f.write(corrected_database)
+
+print("database.py created successfully")
