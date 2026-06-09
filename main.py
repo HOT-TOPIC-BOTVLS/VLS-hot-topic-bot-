@@ -91,8 +91,8 @@ async def load_cogs():
             continue
         
         cog_name = cog_file.stem
-                try:
-            if cog_name in ["main", "config", "database", "logger"]:
+        try:
+            if cog_name in ["main", "config","database", "logger"]: 
                 continue
             
             await bot.load_extension(f"{cog_name}")
