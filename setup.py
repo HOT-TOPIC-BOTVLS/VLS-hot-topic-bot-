@@ -284,11 +284,11 @@ class Setup(commands.Cog):
             logger.error(f"Error in transfer_ownership command: {e}", exc_info=True)
             await ctx.send("❌ Error transferring ownership.")
 
-import asyncio
 
-    @commands.command(name="setupcheck")
-    @commands.has_permissions(administrator=True)
-    async def setup_check(self, ctx):
+
+@commands.command(name="setupcheck")
+@commands.has_permissions(administrator=True)
+async def setup_check(self, ctx):
         """Verify bot configuration and permissions."""
         try:
             import subprocess
