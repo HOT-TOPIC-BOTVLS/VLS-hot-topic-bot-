@@ -69,3 +69,457 @@
 </div>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot Helper — Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; color: #e8e8e8; font-family: 'Segoe UI', sans-serif; }
+
+  /* Layout */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+    background: #0f0f0f; border-right: 1px solid #1e1e1e;
+    display: flex; flex-direction: column; padding: 24px 16px; z-index: 100;
+  }
+  .logo { font-size: 22px; font-weight: 700; padding: 0 8px 24px; border-bottom: 1px solid #1e1e1e; margin-bottom: 16px; }
+  .logo span { color: #ff4444; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; color: #888; transition: all 0.15s; margin-bottom: 4px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: #1a1a1a; color: #fff; }
+  .nav-item.active { background: #1e1e1e; color: #fff; }
+  .sidebar-footer { margin-top: auto; }
+  .logout {
+    display: block; text-align: center; padding: 10px;
+    background: #1a1a1a; border-radius: 8px; color: #888;
+    text-decoration: none; font-size: 13px; transition: all 0.15s;
+  }
+  .logout:hover { background: #2a1010; color: #ff6666; }
+
+  .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Cards */
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .card {
+    background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 20px;
+  }
+  .card-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .card-value { font-size: 28px; font-weight: 700; }
+
+  /* Tables */
+  .table-wrap { background: #111; border: 1px solid #1e1e1e; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 16px 20px; border-bottom: 1px solid #1e1e1e; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 10px 20px; text-align: left; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #1a1a1a; }
+  td { padding: 12px 20px; font-size: 14px; border-bottom: 1px solid #141414; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #151515; }
+
+  /* Forms */
+  .form-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  input[type="text"], input[type="number"] {
+    background: #1a1a1a; border: 1px solid #2a2a2a; color: #fff;
+    padding: 10px 14px; border-radius: 8px; font-size: 14px; flex: 1;
+    outline: none; transition: border 0.15s;
+  }
+  input:focus { border-color: #ff4444; }
+  .btn {
+    padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-primary { background: #ff4444; color: #fff; }
+  .btn-primary:hover { background: #e03333; }
+  .btn-secondary { background: #1e1e1e; color: #ccc; }
+  .btn-secondary:hover { background: #2a2a2a; color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-danger { background: #2a1010; color: #ff6666; }
+  .btn-danger:hover { background: #3a1515; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-warn { background: #2a2000; color: #ffbb00; }
+  .badge-mute { background: #1a1030; color: #aa88ff; }
+  .badge-ok   { background: #0a2a0a; color: #44ff88; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #111; border: 1px solid #2a2a2a; border-radius: 10px;
+    padding: 12px 20px; font-size: 14px; opacity: 0;
+    transition: opacity 0.3s; pointer-events: none; z-index: 999;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px; color: #555; font-size: 14px; }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">🔥 <span>Hot</span> Helper</div>
+  <button class="nav-item active" onclick="show('overview')">📊 Overview</button>
+  <button class="nav-item" onclick="show('moderation')">🛡️ Moderation</button>
+  <button class="nav-item" onclick="show('leaderboard')">🏆 Leaderboard</button>
+  <button class="nav-item" onclick="show('qotd')">🎯 QOTD</button>
+  <button class="nav-item" onclick="show('roles')">🎭 Roles</button>
+  <div class="sidebar-footer">
+    <a class="logout" href="/logout">Sign out</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Overview -->
+  <div class="page active" id="page-overview">
+    <div class="page-title">Overview</div>
+    <div class="cards" id="overview-cards">
+      <div class="card"><div class="card-label">Guild ID</div><div class="card-value" id="ov-guild">—</div></div>
+      <div class="card"><div class="card-label">Pending Mutes</div><div class="card-value" id="ov-mutes">—</div></div>
+      <div class="card"><div class="card-label">QOTD Questions</div><div class="card-value" id="ov-qotd">—</div></div>
+      <div class="card"><div class="card-label">Custom Roles</div><div class="card-value" id="ov-roles">—</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">Guild Config</div>
+      <table><tbody id="config-table"><tr><td class="empty">Loading...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- Moderation -->
+  <div class="page" id="page-moderation">
+    <div class="page-title">Moderation</div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>Lookup User</span>
+      </div>
+      <div style="padding:16px 20px;">
+        <div class="form-row">
+          <input type="text" id="mod-userid" placeholder="User ID (e.g. 123456789012345678)">
+          <button class="btn btn-primary" onclick="lookupUser()">Look up</button>
+        </div>
+      </div>
+    </div>
+    <div id="mod-results" style="display:none">
+      <div class="table-wrap">
+        <div class="table-header">Mod Logs</div>
+        <table>
+          <thead><tr><th>Type</th><th>Reason</th><th>Mod ID</th><th>Timestamp</th></tr></thead>
+          <tbody id="modlog-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">Pending Mutes</div>
+      <table>
+        <thead><tr><th>User ID</th><th>Reason</th><th>Duration</th><th>Mod ID</th><th>Requested</th></tr></thead>
+        <tbody id="pending-table"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="page" id="page-leaderboard">
+    <div class="page-title">Leaderboard</div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>Top Users by XP</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" onclick="lbPage(-1)">← Prev</button>
+          <span id="lb-page-label" style="line-height:28px;font-size:13px;color:#666">Page 1</span>
+          <button class="btn btn-secondary btn-sm" onclick="lbPage(1)">Next →</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>User ID</th><th>Level</th><th>Total XP</th><th>Actions</th></tr></thead>
+        <tbody id="lb-table"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">Reset User XP</div>
+      <div style="padding:16px 20px;">
+        <div class="form-row">
+          <input type="text" id="xp-userid" placeholder="User ID">
+          <button class="btn btn-danger" onclick="resetXP()">Reset XP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QOTD -->
+  <div class="page" id="page-qotd">
+    <div class="page-title">Question of the Day</div>
+    <div class="table-wrap">
+      <div class="table-header">Add Question</div>
+      <div style="padding:16px 20px;">
+        <div class="form-row">
+          <input type="text" id="qotd-input" placeholder="Type your question...">
+          <button class="btn btn-primary" onclick="addQotd()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>Question Pool</span>
+        <button class="btn btn-secondary btn-sm" onclick="resetQotd()">Reset All Used</button>
+      </div>
+      <table>
+        <thead><tr><th>ID</th><th>Question</th><th>Status</th></tr></thead>
+        <tbody id="qotd-table"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Roles -->
+  <div class="page" id="page-roles">
+    <div class="page-title">Custom Roles</div>
+    <div class="table-wrap">
+      <div class="table-header">Roles</div>
+      <table>
+        <thead><tr><th>Name</th><th>Role ID</th><th>Self-Assignable</th><th>Created By</th></tr></thead>
+        <tbody id="roles-table"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+let guildId = null;
+let lbCurrentPage = 1;
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (page === 'overview')    loadOverview();
+  if (page === 'moderation')  loadPendingMutes();
+  if (page === 'leaderboard') loadLeaderboard();
+  if (page === 'qotd')        loadQotd();
+  if (page === 'roles')       loadRoles();
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────────
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = ok ? '#2a4a2a' : '#4a2a2a';
+  t.style.color = ok ? '#88ff88' : '#ff8888';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── API helper ───────────────────────────────────────────────────────────────
+async function api(path, opts={}) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+// ── Overview ─────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const guilds = await api('/api/guilds');
+    if (!guilds.length) {
+      document.getElementById('ov-guild').textContent = 'None';
+      return;
+    }
+    guildId = guilds[0].guild_id;
+    document.getElementById('ov-guild').textContent = guildId;
+
+    const [config, mutes, qotd, roles] = await Promise.all([
+      api(`/api/guild/${guildId}/config`),
+      api(`/api/guild/${guildId}/pending-mutes`),
+      api('/api/qotd'),
+      api(`/api/guild/${guildId}/roles`),
+    ]);
+
+    document.getElementById('ov-mutes').textContent = mutes.length;
+    document.getElementById('ov-qotd').textContent = qotd.filter(q => !q.used).length + ' unused';
+    document.getElementById('ov-roles').textContent = roles.length;
+
+    const tbody = document.getElementById('config-table');
+    const skip = ['guild_id', 'created_at'];
+    tbody.innerHTML = Object.entries(config)
+      .filter(([k]) => !skip.includes(k))
+      .map(([k, v]) => `<tr><td style="color:#666;width:200px">${k}</td><td>${v ?? '<span style="color:#444">not set</span>'}</td></tr>`)
+      .join('');
+  } catch(e) {
+    toast('Error loading overview', false);
+  }
+}
+
+// ── Moderation ────────────────────────────────────────────────────────────────
+async function lookupUser() {
+  const uid = document.getElementById('mod-userid').value.trim();
+  if (!uid || !guildId) return;
+  try {
+    const logs = await api(`/api/guild/${guildId}/modlogs/${uid}`);
+    const tbody = document.getElementById('modlog-table');
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">No mod history found.</td></tr>';
+    } else {
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td><span class="badge ${l.type === 'warning' ? 'badge-warn' : 'badge-mute'}">${l.type}</span></td>
+          <td>${l.reason}</td>
+          <td>${l.mod_id}</td>
+          <td style="color:#666;font-size:12px">${l.timestamp}</td>
+        </tr>`).join('');
+    }
+    document.getElementById('mod-results').style.display = 'block';
+  } catch(e) {
+    toast('User not found or no data', false);
+  }
+}
+
+async function loadPendingMutes() {
+  if (!guildId) { const g = await api('/api/guilds'); if(g.length) guildId = g[0].guild_id; }
+  try {
+    const mutes = await api(`/api/guild/${guildId}/pending-mutes`);
+    const tbody = document.getElementById('pending-table');
+    if (!mutes.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No pending mutes.</td></tr>';
+    } else {
+      tbody.innerHTML = mutes.map(m => `
+        <tr>
+          <td>${m.user_id}</td>
+          <td>${m.reason}</td>
+          <td>${m.duration ? m.duration + 's' : 'Permanent'}</td>
+          <td>${m.mod_id}</td>
+          <td style="color:#666;font-size:12px">${m.issued_at}</td>
+        </tr>`).join('');
+    }
+  } catch(e) { console.error(e); }
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+async function loadLeaderboard() {
+  if (!guildId) { const g = await api('/api/guilds'); if(g.length) guildId = g[0].guild_id; }
+  document.getElementById('lb-page-label').textContent = `Page ${lbCurrentPage}`;
+  try {
+    const rows = await api(`/api/guild/${guildId}/leaderboard?page=${lbCurrentPage}`);
+    const offset = (lbCurrentPage - 1) * 10;
+    const tbody = document.getElementById('lb-table');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No data yet.</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map((r, i) => `
+        <tr>
+          <td style="color:#666">#${offset + i + 1}</td>
+          <td>${r.user_id}</td>
+          <td><span class="badge badge-ok">Lv ${r.level}</span></td>
+          <td>${r.total_xp} XP</td>
+          <td><button class="btn btn-danger btn-sm" onclick="resetXPDirect(${r.user_id})">Reset</button></td>
+        </tr>`).join('');
+    }
+  } catch(e) { toast('Error loading leaderboard', false); }
+}
+
+function lbPage(dir) {
+  lbCurrentPage = Math.max(1, lbCurrentPage + dir);
+  loadLeaderboard();
+}
+
+async function resetXP() {
+  const uid = document.getElementById('xp-userid').value.trim();
+  if (!uid || !guildId) return;
+  await resetXPDirect(uid);
+}
+
+async function resetXPDirect(uid) {
+  if (!confirm(`Reset XP for user ${uid}?`)) return;
+  try {
+    await api(`/api/guild/${guildId}/xp/${uid}/reset`, { method: 'POST' });
+    toast('XP reset successfully');
+    loadLeaderboard();
+  } catch(e) { toast('Error resetting XP', false); }
+}
+
+// ── QOTD ──────────────────────────────────────────────────────────────────────
+async function loadQotd() {
+  try {
+    const questions = await api('/api/qotd');
+    const tbody = document.getElementById('qotd-table');
+    if (!questions.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No questions yet.</td></tr>';
+    } else {
+      tbody.innerHTML = questions.map(q => `
+        <tr>
+          <td style="color:#666;width:60px">${q.id}</td>
+          <td>${q.question}</td>
+          <td><span class="badge ${q.used ? 'badge-mute' : 'badge-ok'}">${q.used ? 'used' : 'unused'}</span></td>
+        </tr>`).join('');
+    }
+  } catch(e) { toast('Error loading QOTD', false); }
+}
+
+async function addQotd() {
+  const q = document.getElementById('qotd-input').value.trim();
+  if (!q) return;
+  try {
+    await api('/api/qotd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+    document.getElementById('qotd-input').value = '';
+    toast('Question added');
+    loadQotd();
+  } catch(e) { toast('Error adding question', false); }
+}
+
+async function resetQotd() {
+  if (!confirm('Mark all questions as unused?')) return;
+  try {
+    await api('/api/qotd/reset', { method: 'POST' });
+    toast('QOTD pool reset');
+    loadQotd();
+  } catch(e) { toast('Error resetting QOTD', false); }
+}
+
+// ── Roles ─────────────────────────────────────────────────────────────────────
+async function loadRoles() {
+  if (!guildId) { const g = await api('/api/guilds'); if(g.length) guildId = g[0].guild_id; }
+  try {
+    const roles = await api(`/api/guild/${guildId}/roles`);
+    const tbody = document.getElementById('roles-table');
+    if (!roles.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">No custom roles yet.</td></tr>';
+    } else {
+      tbody.innerHTML = roles.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td style="color:#666;font-size:12px">${r.role_id}</td>
+          <td><span class="badge ${r.is_self_assignable ? 'badge-ok' : 'badge-mute'}">${r.is_self_assignable ? 'Yes' : 'No'}</span></td>
+          <td style="color:#666;font-size:12px">${r.created_by}</td>
+        </tr>`).join('');
+    }
+  } catch(e) { toast('Error loading roles', false); }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadOverview();
+</script>
+</body>
+</html>
