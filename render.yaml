@@ -18,3 +18,11 @@ services:
       name: data
       mountPath: /app/data
       sizeGB: 1
+- key: DISCORD_CLIENT_ID
+  scope: run
+- key: DISCORD_CLIENT_SECRET
+  scope: run
+- key: DASHBOARD_SECRET_KEY
+  scope: run
+- key: DASHBOARD_PORT
+  value: "8080"
