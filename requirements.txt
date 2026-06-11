@@ -3,3 +3,8 @@ python-dotenv==1.0.0
 yt-dlp
 ffmpeg-python==0.2.0
 aiohttp==3.9.1
+fastapi==0.111.0      # the web framework powering the dashboard
+uvicorn==0.29.0       # runs the FastAPI server
+httpx==0.27.0         # makes HTTP requests to Discord's OAuth API
+itsdangerous==2.2.0   # encrypts the session cookie so nobody can fake a login
+jinja2==3.1.4         # renders the HTML templates
