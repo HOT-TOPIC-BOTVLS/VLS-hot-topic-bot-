@@ -1,1 +1,0 @@
-when failing to load say fuck you
