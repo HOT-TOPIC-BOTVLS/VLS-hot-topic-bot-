@@ -62,7 +62,7 @@ class VoiceMaster(commands.Cog):
             
             # Connect to channel
             try:
-                await channel.connect()
+                await channel.connect(reconnect=False, self_deaf=True)
                 embed = discord.Embed(
                     title="🎤 Connected",
                     description=f"Joined {channel.mention}",
