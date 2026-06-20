@@ -23,7 +23,7 @@ intents.message_content = True
 intents.members = True
 intents.guilds = True
 intents.voice_states = True
-intents.reactions= true
+intents.reactions= True
 
 bot = commands.Bot(
     command_prefix=BOT_PREFIX,
