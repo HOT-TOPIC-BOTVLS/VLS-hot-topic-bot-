@@ -1452,7 +1452,7 @@ class Economy(commands.Cog):
         self.save_data()
         await ctx.send(f"{ctx.author.mention} sent **{amount}** bucks to {member.mention}.")
 
-    @commands.command(name="leaderboard", aliases=["lb"])
+    @commands.command(name="richlist", aliases=["moneyboard"])
     async def leaderboard(self, ctx):
         ranked = sorted(self.users.items(), key=lambda kv: kv[1]["balance"] + kv[1]["bank_balance"], reverse=True)[:10]
         if not ranked:
